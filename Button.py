@@ -49,7 +49,7 @@ class Button:
         font = pygame.font.Font(None, self.font_size)
         text = font.render(self.caption, True, (0, 0, 0))
         rect_text = text.get_rect(center=(self.x + self.w // 2, self.y + self.h // 2))
-        win.blit(text, button_rect)
+        win.blit(text, rect_text)
         pass
 
     def check_press(self, mouse_coord):
