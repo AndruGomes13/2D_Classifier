@@ -6,7 +6,7 @@ import config
 ### Variable Declaration ###
 
 # Creating window
-DISPLAY_DIM = (500, 500)
+DISPLAY_DIM = (600, 450)
 WIN = pygame.display.set_mode(DISPLAY_DIM)
 pygame.display.set_caption('Show Text')
 
@@ -20,8 +20,12 @@ config.init()
 
 # Dot list
 dot_list = []
+button_list = []
 
-button = Button(10, 200, 100, 100, caption="Test", background_color="red", font_size=30)
+button1 = Button(10, 10, 100, 40, caption="Button 1", background_color="red", font_size=30)
+button2 = Button(10, 10 + 50, 100, 40, caption="Button 2", background_color="black", font_size=30, font_color="grey")
+button3 = Button(10, 10 + 100, 100, 40, caption="Button 3", background_color="grey", font_size=30)
+workspace = Button(130, 10, 400, 400, border_width = 3)
 
 
 def main():
@@ -41,15 +45,27 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse = pygame.mouse.get_pos()
                 if event.button == 1:
-                    color = "red"
-                    dot = Dot(mouse[0],mouse[1], color)
-                    dot_list.append(dot)
-                if event.button == 3:
-                    color = "black"
-                    dot = Dot(mouse[0],mouse[1], color)
-                    dot_list.append(dot)
-                if event.button == 2 and button.check_press(mouse):
-                    print("clicked")
+                    if button1.check_press(mouse):
+                        button1.active ^= 1
+
+                    if button2.check_press(mouse):
+                        button2.active ^= 1
+
+                    if button3.check_press(mouse):
+                        button3.active ^= 1
+
+                    if workspace.check_press(mouse):
+                        if button1.active:
+                            color = "red"
+                            dot = Dot(mouse[0],mouse[1], color)
+                            dot_list.append(dot)
+
+                        if not button1.active:
+                            color = "green"
+                            dot = Dot(mouse[0],mouse[1], color)
+                            dot_list.append(dot)
+
+
 
 
   
@@ -60,7 +76,10 @@ def main():
         WIN.fill(config.color_dict["white"])
         for dot in dot_list:
             dot.draw(WIN)
-        button.draw(WIN)
+        button1.draw(WIN)
+        button2.draw(WIN)
+        button3.draw(WIN)
+        workspace.draw(WIN)
         pygame.display.update()
     
 
