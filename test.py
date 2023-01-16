@@ -53,10 +53,11 @@ yellow = Spaceship(100, 100, "yellow")
 red = Spaceship(300, 300, "red")
 
 
-def draw_window(yellow, red):
+def draw_window(yellow, red, button):
     WIN.fill(WHITE)
     WIN.blit(YELLOW_SPACESHIP_IMAGE, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP_IMAGE, (red.x, red.y))
+    button.draw(WIN)
     pygame.display.update()
 
 def red_handle_movement(obj, keys_pressed):
@@ -94,8 +95,7 @@ def main():
         yellow_handle_movement(yellow, keys_pressed)
         red_handle_movement(red, keys_pressed)
 
-        draw_window(yellow, red)
-        b.draw(WIN)
+        draw_window(yellow, red, b)
 
     pygame.quit()
 
