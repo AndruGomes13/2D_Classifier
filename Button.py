@@ -87,12 +87,3 @@ class Button:
             mouse_coord[1] > self.limits[1][0] and
             mouse_coord[1] < self.limits[1][1])
 
-
-
-        # if (mouse_coord[0] > self.limits[0][0] and 
-        # mouse_coord[0] < self.limits[0][1] and
-        # mouse_coord[1] > self.limits[1][0] and
-        # mouse_coord[1] > self.limits[1][1]):
-        #     return True
-        # else:
-        #     return False
