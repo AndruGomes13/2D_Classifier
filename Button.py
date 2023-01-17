@@ -27,7 +27,7 @@ class Button:
         self.border_width = border_width
         self.border_radius = border_radius
 
-        self.active = True
+        self.state = True
 
     ### Font color assignements ###    
     @property
@@ -73,7 +73,7 @@ class Button:
     def draw(self, win):
         # Draw button
         button_rect = pygame.Rect(self.x, self.y, self.w, self.h)
-        b_color = self._background_color_code if self.active else self._background_color_code2
+        b_color = self._background_color_code if self.state else self._background_color_code2
         pygame.draw.rect(win, b_color, button_rect, self.border_width, border_radius=self.border_radius)
         
         # Draw caption

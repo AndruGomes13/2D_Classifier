@@ -31,3 +31,6 @@ class Dot:
 
     def draw(self, win):
         pygame.draw.circle(win, self._color_code, (self.x, self.y), self.radius)
+
+    def coords(self):
+        return (self.x, self.y)
