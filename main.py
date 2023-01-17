@@ -22,9 +22,12 @@ config.init()
 dot_list = []
 button_list = []
 
-button1 = Button(10, 10, 100, 40, caption="Button 1", background_color="red", font_size=30)
-button2 = Button(10, 10 + 50, 100, 40, caption="Button 2", background_color="black", font_size=30, font_color="grey")
-button3 = Button(10, 10 + 100, 100, 40, caption="Button 3", background_color="grey", font_size=30)
+button1 = Button(10, 10, 100, 40, caption="Color", background_color="red", font_size=30, border_width= 3)
+button2 = Button(10, 10 + 50, 100, 40, caption="Place", background_color="black", font_size=30, font_color="grey")
+button3 = Button(10, 10 + 100, 100, 40, caption="Run", background_color="grey", font_size=30, border_radius= 8)
+button_list.append(button1)
+button_list.append(button2)
+button_list.append(button3)
 workspace = Button(130, 10, 400, 400, border_width = 3)
 
 
@@ -64,7 +67,8 @@ def main():
                             color = "green"
                             dot = Dot(mouse[0],mouse[1], color)
                             dot_list.append(dot)
-
+            if event.type == pygame.MOUSEMOTION:
+                pass
 
 
 
@@ -76,9 +80,9 @@ def main():
         WIN.fill(config.color_dict["white"])
         for dot in dot_list:
             dot.draw(WIN)
-        button1.draw(WIN)
-        button2.draw(WIN)
-        button3.draw(WIN)
+
+        for button in button_list:
+            button.draw(WIN)
         workspace.draw(WIN)
         pygame.display.update()
     

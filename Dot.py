@@ -7,7 +7,7 @@ class Dot:
     def __init__(self, x, y, color="black") -> None:
         self.x = x
         self.y = y
-        self.radius = 10
+        self.radius = 4
         self._color = color
         self._color_code = config.color_dict[color]
 
