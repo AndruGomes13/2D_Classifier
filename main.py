@@ -1,138 +1,110 @@
+############### Imports ################
+
 import pygame
+from Buttons import *
 from Dot import *
-from Button import *
-import config
+from pygame.event import Event
+# import config
 
-### Variable Declaration ###
+############### Variable Declaration ###########
 
-# Creating window
-DISPLAY_DIM = (550, 430)
+# --------------- Constants -----------------
+
+# Window Size
+WINDOW_WIDTH = 550
+WINDOW_HEIGHT = 450
+DISPLAY_DIM = (WINDOW_WIDTH, WINDOW_HEIGHT)
+
+# Creating Window
 WIN = pygame.display.set_mode(DISPLAY_DIM)
-pygame.display.set_caption('Show Text')
+pygame.display.set_caption('Algorithm Demo')
 
-# Frame-rate set
+# Frames per second
 FPS = 60
-clock = pygame.time.Clock()
+CLOCK = pygame.time.Clock()
+
+
+# --------------- Global Variables ------------
 
 # Initialize global project variables
 pygame.init()
-config.init()
+# config.init()
 
-# Dot list
+
+# Object list
 dot_list = []
-button_list = []
 
-color_select_button = Button(10, 10, 100, 40, caption="Color", background_color="red", font_size=30, border_width= 3, border_radius= 3)
-mode_button = Button(10, 10 + 50, 100, 40, caption="Place", background_color="black", font_size=30, font_color="grey", border_radius= 3)
-run_sim_button = Button(10, 10 + 100, 100, 40, caption="Run", background_color="grey", font_size=30, border_radius= 3)
+########## Auxiliary functions ##########
 
-button_list.append(color_select_button)
-button_list.append(mode_button)
-button_list.append(run_sim_button)
-
-workspace = Button(120, 10, 400, 400, border_width = 3)
-
-
-def add_dot(coord, color):
-    dot = Dot(coord[0],coord[1], color)
+# Adds dot
+def add_dot(coordinates: tuple, color: "string" ) -> None:
+    dot = Dot(coordinates[0], coordinates[1], color)
     dot_list.append(dot)
 
-def remove_dot(dot):
-    dot_list.remove(dot)
+# Handles mouse clicks (Adding and removing dots)
+def click_handling(event: Event, mouse_pos : tuple) -> None:
+    if event.button == 1:
+        add_dot(mouse_pos, "red")
 
-def get_closest_dot(mouse):
-    def dist_squared(dot1, dot2):
-        return (dot1[0] - dot2[0])**2 + (dot1[1] - dot2[1])**2
-    c_dot = []
+    if event.button == 3:
+        add_dot(mouse_pos, "blue")
 
-    for dot in dot_list:
-        if c_dot == []:
-            c_dot = [dot, dist_squared(mouse, dot.coords())]
-            continue
-        dist = dist_squared(mouse, dot.coords())
-        if dist < c_dot[1]:
-            c_dot[0] = dot
-            c_dot[1] = dist
+# Handles key presses (Mode changes)
+def key_handling(event: Event) -> None:
+    if event.key == pygame.K_a:
+        print("a")
 
-    return c_dot[0]
-
-
-
-def main():
-    # Frame-rate set
-    FPS = 60
-    clock = pygame.time.Clock()
-    ### Program Loop ###
-    run = True
-    while run:
-        clock.tick(FPS)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                print(event)
-                run = False
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse = pygame.mouse.get_pos()
-                if event.button == 1:
-                    if color_select_button.check_press(mouse):
-                        color_select_button.state ^= 1
-
-                    if mode_button.check_press(mouse):
-                        mode_button.state ^= 1
-
-                    if run_sim_button.check_press(mouse):
-                        run_sim_button.state ^= 1
-
-
-                    # Checks if click is inside the workspace
-                    if workspace.check_press(mouse):
-                        if not mode_button.state:
-                            if dot_list:
-                                print("remove")
-                                dot = get_closest_dot(mouse)
-                                remove_dot(dot)
-                            continue
-                        if color_select_button.state:
-                            add_dot(mouse, "red")
-
-                        if not color_select_button.state:
-                            add_dot(mouse, "green")
-
-                        
-
-            if event.type == pygame.MOUSEMOTION:
-                pass
-
-
-
-  
-
-
-
-        
-        WIN.fill(config.color_dict["white"])
-        for dot in dot_list:
-            dot.draw(WIN)
-
-        for button in button_list:
-            button.draw(WIN)
-        workspace.draw(WIN)
-        pygame.display.update()
     
 
-    pygame.quit()
+
+########## Main ##########
+def main():
+    
+    # Setting FPS
+    CLOCK.tick(FPS)
+
+    # Getting Mouse position
+    mouse_pos = pygame.mouse.get_pos()
+
+    # Handling events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return "quit"
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            click_handling(event, mouse_pos)
+
+        if event.type == pygame.KEYDOWN:
+            key_handling(event)
+
+    
+
+    ######### Rendering ###########
+    WIN.fill(pygame.Color("white"))
+
+    # Rendering dots
+    for dot in dot_list:
+        dot.draw(WIN)
 
 
 
 
+    # Update display
+    pygame.display.update()
 
 
-
+    
 
 
 
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        status = main()
+
+        # Handling app status
+        if status == "quit":
+            break
+
+    pygame.quit()
