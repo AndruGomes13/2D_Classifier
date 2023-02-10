@@ -1,104 +1,164 @@
+############### Imports ################
+
 import pygame
+from Buttons import *
 from Dot import *
-from Button import *
-import config
+from pygame.event import Event
+from Plot_function import *
+import math
 
-### Variable Declaration ###
+############### Variable Declaration ###########
 
-# Creating window
-DISPLAY_DIM = (600, 450)
+# --------------- Constants -----------------
+
+# Window Size
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 450
+DISPLAY_DIM = (WINDOW_WIDTH, WINDOW_HEIGHT)
+
+# Creating Window
 WIN = pygame.display.set_mode(DISPLAY_DIM)
-pygame.display.set_caption('Show Text')
+pygame.display.set_caption('Algorithm Demo')
 
-# Frame-rate set
+# Frames per second
 FPS = 60
-clock = pygame.time.Clock()
+CLOCK = pygame.time.Clock()
+
+
+# --------------- Global Variables ------------
 
 # Initialize global project variables
 pygame.init()
-config.init()
 
-# Dot list
+# Program Context
+ProgramContext = {"Mode_dot_create":True,
+                  "Mode_dot_remove": False}
+
+# Object list
 dot_list = []
-button_list = []
 
-button1 = Button(10, 10, 100, 40, caption="Color", background_color="red", font_size=30, border_width= 3)
-button2 = Button(10, 10 + 50, 100, 40, caption="Place", background_color="black", font_size=30, font_color="grey")
-button3 = Button(10, 10 + 100, 100, 40, caption="Run", background_color="grey", font_size=30, border_radius= 8)
-button_list.append(button1)
-button_list.append(button2)
-button_list.append(button3)
-workspace = Button(130, 10, 400, 400, border_width = 3)
+########## Auxiliary functions ##########
 
+# Adds dot
+def add_dot(coordinates: tuple, color: "string" ) -> None:
+    dot = Dot(coordinates[0], coordinates[1], color)
+    dot_list.append(dot)
 
-def main():
-    # Frame-rate set
-    FPS = 60
-    clock = pygame.time.Clock()
-    ### Program Loop ###
-    run = True
-    while run:
-        clock.tick(FPS)
+# Removes dot
+def rm_dot(dot: Dot):
+    dot_list.remove(dot)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                print(event)
-                run = False
+# Removes last dot
+def rm_dot_last():
+    if dot_list != []:
+        del dot_list[-1]
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse = pygame.mouse.get_pos()
-                if event.button == 1:
-                    if button1.check_press(mouse):
-                        button1.active ^= 1
+# Handles mouse clicks (Adding and removing dots)
+def click_handling(event: Event, mouse_pos : tuple) -> None:
+    if event.button == 1 and ProgramContext["Mode_dot_create"]:
+        add_dot(mouse_pos, "red")
 
-                    if button2.check_press(mouse):
-                        button2.active ^= 1
+    if event.button == 1 and ProgramContext["Mode_dot_remove"]:
+        rm_dot_last()
 
-                    if button3.check_press(mouse):
-                        button3.active ^= 1
+    if event.button == 3 and ProgramContext["Mode_dot_create"]:
+        add_dot(mouse_pos, "blue")
 
-                    if workspace.check_press(mouse):
-                        if button1.active:
-                            color = "red"
-                            dot = Dot(mouse[0],mouse[1], color)
-                            dot_list.append(dot)
-
-                        if not button1.active:
-                            color = "green"
-                            dot = Dot(mouse[0],mouse[1], color)
-                            dot_list.append(dot)
-            if event.type == pygame.MOUSEMOTION:
-                pass
-
-
-
-  
-
-
-
-        
-        WIN.fill(config.color_dict["white"])
-        for dot in dot_list:
-            dot.draw(WIN)
-
-        for button in button_list:
-            button.draw(WIN)
-        workspace.draw(WIN)
-        pygame.display.update()
+# Handles key presses (Mode changes)
+def key_handling(event: Event) -> None:
     
+    # Set dot add mode
+    if event.key == pygame.K_a:
+        ProgramContext["Mode_dot_create"] = True
+        ProgramContext["Mode_dot_remove"] = False
 
-    pygame.quit()
+    # Set dot remove mode
+    if event.key == pygame.K_d:
+        ProgramContext["Mode_dot_create"] = False
+        ProgramContext["Mode_dot_remove"] = True
+
+# Displays FPS
+def display_fps():
+    "Data that will be rendered and blitted in _display"
+    def render(fnt, what, color, where):
+        "Renders the fonts as passed from display_fps"
+        text_to_show = fnt.render(what, 1, pygame.Color(color))
+        WIN.blit(text_to_show, where)
+
+    # Renders the FPS count at the corner of the screen
+    render(
+        pygame.font.SysFont("Arial", 20),
+        what  = str(int(CLOCK.get_fps())),
+        color = "green",
+        where = (WINDOW_WIDTH - 50, 0))
+
+# Function plot object
+
+a = 0
+def test_function(x):
+    return math.sin(x + a)
+
+plot = Plot_function(test_function, [-10, 10], [-10, 10], DISPLAY_DIM)
+plot.number_of_points = 1000
 
 
+########## Main ##########
+def main():
+    global a
+
+    # Setting FPS
+    CLOCK.tick(FPS)
+
+    # Getting Mouse position
+    mouse_pos = pygame.mouse.get_pos()
+
+    # Handling events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return "quit"
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            click_handling(event, mouse_pos)
+
+        if event.type == pygame.KEYDOWN:
+            key_handling(event)
+
+    if pygame.key.get_pressed()[pygame.K_m]:
+        a += 0.1
+    if pygame.key.get_pressed()[pygame.K_n]:
+        a -= 0.1
+
+    ######### Rendering ###########
+    WIN.fill(pygame.Color("white"))
+
+    # Rendering dots
+    for dot in dot_list:
+        dot.draw(WIN)
+
+    # Plotting Function
+    plot.draw(WIN)
 
 
+    def dyn_function(x):
+        
+        return math.sin(x * 12 + a) * math.sin(x + a / 3)*4
+    plot.func = dyn_function
 
+    # Display FPS
+    display_fps()
 
-
-
+    # Update display
+    pygame.display.update()
 
 
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        status = main()
+
+        # Handling app status
+        if status == "quit":
+            break
+
+    pygame.quit()

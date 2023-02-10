@@ -1,104 +1,130 @@
-import pygame, random, os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.datasets import make_moons, make_circles, make_classification
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.inspection import DecisionBoundaryDisplay
 
-DISPLAY_DIM = (900, 500)
+names = [
+    "Nearest Neighbors",
+    "Linear SVM",
+    "RBF SVM",
+    "Gaussian Process",
+    "Decision Tree",
+    "Random Forest",
+    "Neural Net",
+    "AdaBoost",
+    "Naive Bayes",
+    "QDA",
+]
 
-WIN = pygame.display.set_mode(DISPLAY_DIM)
-pygame.display.set_caption("First Window")
+classifiers = [
+    KNeighborsClassifier(3),
+    SVC(kernel="linear", C=0.025),
+    SVC(gamma=2, C=1),
+    GaussianProcessClassifier(1.0 * RBF(1.0)),
+    DecisionTreeClassifier(max_depth=5),
+    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+    MLPClassifier(alpha=1, max_iter=1000),
+    AdaBoostClassifier(),
+    GaussianNB(),
+    QuadraticDiscriminantAnalysis(),
+]
 
-WHITE = (255,255,255)
+X, y = make_classification(
+    n_features=2, n_redundant=0, n_informative=2, random_state=1, n_clusters_per_class=1
+)
+rng = np.random.RandomState(2)
+X += 2 * rng.uniform(size=X.shape)
+linearly_separable = (X, y)
 
-color_dict={"white": (255,255,255),
-            "black": (0, 0, 0)}
+datasets = [
+    make_moons(noise=0.3, random_state=0),
+    make_circles(noise=0.2, factor=0.5, random_state=1),
+    linearly_separable,
+]
 
-FPS = 60
+figure = plt.figure(figsize=(27, 9))
+i = 1
+# iterate over datasets
+for ds_cnt, ds in enumerate(datasets):
+    # preprocess dataset, split into training and test part
+    X, y = ds
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.4, random_state=42
+    )
 
-SPACESHIP_WIDTH = 50
-SPACESHIP_HEIGHT = 30
+    x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
+    y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
 
-YELLOW_SPACESHIP_IMAGE = pygame.image.load(
-    os.path.join("Assets", "spaceship_yellow.png"))
-YELLOW_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
+    # just plot the dataset first
+    cm = plt.cm.RdBu
+    cm_bright = ListedColormap(["#FF0000", "#0000FF"])
+    ax = plt.subplot(len(datasets), len(classifiers) + 1, i)
+    if ds_cnt == 0:
+        ax.set_title("Input data")
+    # Plot the training points
+    ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, edgecolors="k")
+    # Plot the testing points
+    ax.scatter(
+        X_test[:, 0], X_test[:, 1], c=y_test, cmap=cm_bright, alpha=0.6, edgecolors="k"
+    )
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.set_xticks(())
+    ax.set_yticks(())
+    i += 1
 
-RED_SPACESHIP_IMAGE = pygame.image.load(
-    os.path.join("Assets", "spaceship_red.png"))
-RED_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
+    # iterate over classifiers
+    for name, clf in zip(names, classifiers):
+        ax = plt.subplot(len(datasets), len(classifiers) + 1, i)
 
-VEL = 5
+        clf = make_pipeline(StandardScaler(), clf)
+        clf.fit(X_train, y_train)
+        score = clf.score(X_test, y_test)
+        # DecisionBoundaryDisplay.from_estimator(
+        #     clf, X, cmap=cm, alpha=0.8, ax=ax, eps=0.5
+        # )
 
-class Button:
-    def __init__(self, x, y, w, h, caption="", color="black") -> None:
-        self.x = x
-        self.y = y
-        self.width = w
-        self.height = h
-        self.caption = caption
-        self.color = color
-        self.rect_obj = pygame.Rect(self.x, self.y, self.width, self.height)
+        # Plot the training points
+        ax.scatter(
+            X_train[:, 0], X_train[:, 1], c=y_train, cmap=cm_bright, edgecolors="k"
+        )
+        # Plot the testing points
+        ax.scatter(
+            X_test[:, 0],
+            X_test[:, 1],
+            c=y_test,
+            cmap=cm_bright,
+            edgecolors="k",
+            alpha=0.6,
+        )
 
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        ax.set_xticks(())
+        ax.set_yticks(())
+        if ds_cnt == 0:
+            ax.set_title(name)
+        ax.text(
+            x_max - 0.3,
+            y_min + 0.3,
+            ("%.2f" % score).lstrip("0"),
+            size=15,
+            horizontalalignment="right",
+        )
+        i += 1
 
-    def check_click(self, mouse):
-        pass
-
-
-    def draw(self, win):
-        pygame.draw.rect(win, color_dict[self.color], self.rect_obj)
-
-class Spaceship:
-    def __init__(self,x,y,color) -> None:
-        self.x = x
-        self.y = y
-        self.color = color
-
-yellow = Spaceship(100, 100, "yellow")
-red = Spaceship(300, 300, "red")
-
-
-def draw_window(yellow, red, button):
-    WIN.fill(WHITE)
-    WIN.blit(YELLOW_SPACESHIP_IMAGE, (yellow.x, yellow.y))
-    WIN.blit(RED_SPACESHIP_IMAGE, (red.x, red.y))
-    button.draw(WIN)
-    pygame.display.update()
-
-def red_handle_movement(obj, keys_pressed):
-    if keys_pressed[pygame.K_a]:
-        obj.x -= VEL
-    if keys_pressed[pygame.K_d]:
-        obj.x += VEL
-    if keys_pressed[pygame.K_w]:
-        obj.y -= VEL
-    if keys_pressed[pygame.K_s]:
-        obj.y += VEL
-
-def yellow_handle_movement(obj, keys_pressed):
-    if keys_pressed[pygame.K_LEFT]:
-        obj.x -= VEL
-    if keys_pressed[pygame.K_RIGHT]:
-        obj.x += VEL
-    if keys_pressed[pygame.K_UP]:
-        obj.y -= VEL
-    if keys_pressed[pygame.K_DOWN]:
-        obj.y += VEL
-
-b = Button(20, 20,50, 20)
-def main():
-    clock = pygame.time.Clock()
-    run = True
-    while run:
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-       
-
-        keys_pressed = pygame.key.get_pressed()
-        yellow_handle_movement(yellow, keys_pressed)
-        red_handle_movement(red, keys_pressed)
-
-        draw_window(yellow, red, b)
-
-    pygame.quit()
-
-
-if __name__ == "__main__":
-    main()
+plt.tight_layout()
+plt.show()

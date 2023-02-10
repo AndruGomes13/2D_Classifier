@@ -1,33 +1,21 @@
-import config
+############ Imports ############
+
 import pygame
 
-
+######## Base Dot Class ##########
 
 class Dot:
-    def __init__(self, x, y, color="black") -> None:
+    def __init__(self, x : int, y : int, color : tuple = pygame.Color("black")) -> None:
         self.x = x
         self.y = y
-        self.radius = 4
-        self._color = color
-        self._color_code = config.color_dict[color]
-
-    @property
-    def color(self):
-        return self._color
-
-    @color.setter
-    def color(self, value):
-        self._color = value
-        self._color_code = config.color_dict[value]
-
-    @property
-    def color_code(self):
-        return self._color_code
-
-    @color_code.setter
-    def color_code(self, value):
-        self._color_code = value
-        self._color = f"Custom Color: {self._color_code}"
-
+        self.color = color
+        self.color_border = pygame.Color("black")
+        self.radius = 10
+        self.border_width= 2
+    
+    def coords(self):
+        return (self.x, self.y)
+    
     def draw(self, win):
-        pygame.draw.circle(win, self._color_code, (self.x, self.y), self.radius)
+        pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
+        pygame.draw.circle(win, self.color_border, (self.x, self.y), self.radius, width=self.border_width)
