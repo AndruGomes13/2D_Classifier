@@ -24,7 +24,7 @@ CLOCK = pygame.time.Clock()
 
 # Creating window
 
-pygame.display.set_caption('Show Text')
+
 
 
 

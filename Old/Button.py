@@ -117,13 +117,19 @@ class Button:
 
 class StateMachineButton(Button):
 
-    def interact(self, mouse_coord, event):
+    def interact(self, mouse_coord: tuple, event: Event, context: ProgramContext):
+        
         self.state = not self.state
+
+        return self.additional_behaviour(mouse_coord, event, context)
 
 
 class WorkspaceButton(Button):
 
-    def interact(self, mouse_coord, event):
+    def interact(self, mouse_coord: tuple, event: Event, context: ProgramContext):
+        
+        return self.additional_behaviour(mouse_coord, event, context)
+        
         if not self.state:
             if dot_list:
                 print("remove")
